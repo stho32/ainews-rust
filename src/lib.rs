@@ -1,5 +1,7 @@
 /// Library crate for ainews-rust
-/// Contains utility functions for number processing
+/// Contains utility functions for number processing and web requests
+
+pub mod web;
 
 /// Converts a string to an i32 and returns a Result
 pub fn parse_number(input: &str) -> Result<i32, std::num::ParseIntError> {
