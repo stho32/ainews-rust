@@ -1,11 +1,38 @@
 use reqwest::blocking::Client;
 
+/// Represents the result of fetching website content
+#[derive(Debug)]
+pub struct WebsiteContent {
+    pub content: Option<String>,
+    pub error: Option<String>,
+}
+
+impl WebsiteContent {
+    /// Creates a new successful WebsiteContent with the given content
+    fn success(content: String) -> Self {
+        WebsiteContent {
+            content: Some(content),
+            error: None,
+        }
+    }
+
+    /// Creates a new failed WebsiteContent with the given error message
+    fn error(message: String) -> Self {
+        WebsiteContent {
+            content: None,
+            error: Some(message),
+        }
+    }
+}
+
 /// Fetches content from a website with proper headers and error handling
 /// 
-/// Returns a tuple of (Option<String>, Option<String>) where:
-/// - First element is the website content if successful, None if failed
-/// - Second element is the error message if failed, None if successful
-pub fn get_website_content(url: &str) -> (Option<String>, Option<String>) {
+/// # Arguments
+/// * `url` - The URL to fetch content from
+/// 
+/// # Returns
+/// A WebsiteContent struct containing either the content or an error message
+pub fn get_website_content(url: &str) -> WebsiteContent {
     println!("[DEBUG] Attempting to fetch content from {}", url);
 
     let client = Client::builder()
@@ -36,17 +63,17 @@ pub fn get_website_content(url: &str) -> (Option<String>, Option<String>) {
             if res.status().as_u16() != 200 {
                 let error_msg = format!("HTTP {}", res.status());
                 println!("[DEBUG] Error fetching the website {}: {}", url, error_msg);
-                (None, Some(error_msg))
+                WebsiteContent::error(error_msg)
             } else {
                 match res.text() {
                     Ok(text) => {
                         println!("[DEBUG] Successfully fetched content from {}", url);
-                        (Some(text), None)
+                        WebsiteContent::success(text)
                     }
                     Err(e) => {
                         let error_msg = e.to_string();
                         println!("[DEBUG] Error reading content from {}: {}", url, error_msg);
-                        (None, Some(error_msg))
+                        WebsiteContent::error(error_msg)
                     }
                 }
             }
@@ -54,7 +81,7 @@ pub fn get_website_content(url: &str) -> (Option<String>, Option<String>) {
         Err(e) => {
             let error_msg = e.to_string();
             println!("[DEBUG] Error fetching the website {}: {}", url, error_msg);
-            (None, Some(error_msg))
+            WebsiteContent::error(error_msg)
         }
     }
 }
@@ -65,15 +92,15 @@ mod tests {
 
     #[test]
     fn test_get_website_content_success() {
-        let (content, error) = get_website_content("https://www.rust-lang.org");
-        assert!(content.is_some());
-        assert!(error.is_none());
+        let content = get_website_content("https://www.rust-lang.org");
+        assert!(content.content.is_some());
+        assert!(content.error.is_none());
     }
 
     #[test]
     fn test_get_website_content_error() {
-        let (content, error) = get_website_content("https://this-does-not-exist.example.com");
-        assert!(content.is_none());
-        assert!(error.is_some());
+        let content = get_website_content("https://this-does-not-exist.example.com");
+        assert!(content.content.is_none());
+        assert!(content.error.is_some());
     }
 }
