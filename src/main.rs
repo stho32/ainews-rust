@@ -1,3 +1,4 @@
 fn main() {
-    println!("Hello, world!");
+    let my_string = String::from("hello");
+    println!("{}", my_string);
 }
