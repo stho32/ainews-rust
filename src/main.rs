@@ -1,16 +1,27 @@
-use std::io;
-use ainews_rust::parse_number;
+mod web;
+use std::env;
+use web::get_website_content;
 
 fn main() {
-    let mut input = String::new();
-    println!("Please enter a number:");
+    let args: Vec<String> = env::args().collect();
+    
+    if args.len() != 2 {
+        println!("Usage: {} <url>", args[0]);
+        std::process::exit(1);
+    }
 
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
+    let url = &args[1];
+    let (content, error) = get_website_content(url);
 
-    match parse_number(&input) {
-        Ok(number) => println!("Your number is: {}", number),
-        Err(_) => println!("Please enter a valid number"),
+    match (content, error) {
+        (Some(content), None) => println!("Content:\n{}", content),
+        (None, Some(error)) => {
+            eprintln!("Error: {}", error);
+            std::process::exit(1);
+        }
+        _ => {
+            eprintln!("Unexpected state: both content and error are None");
+            std::process::exit(1);
+        }
     }
 }
