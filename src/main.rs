@@ -1,4 +1,5 @@
 mod web;
+mod html_extractors;
 use std::env;
 use web::get_website_content;
 
