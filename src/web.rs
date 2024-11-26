@@ -1,5 +1,4 @@
 use reqwest::blocking::Client;
-use reqwest::Error;
 
 /// Fetches content from a website with proper headers and error handling
 /// 
